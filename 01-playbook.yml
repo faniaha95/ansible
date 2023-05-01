@@ -1,0 +1,90 @@
+---
+- name: create user
+  hosts: all
+  tasks:
+    - name: create user
+      ansible.builtin.user:
+        name: installer
+        shell: /bin/bash
+    - name: allow the backup user to sudo
+      community.general.sudoers:
+        name: allow-backup
+        state: present
+        user: installer
+        commands: ALL
+
+- name: copy ssh
+  hosts: all
+  tasksible
+    - name: create directory
+      ansible.builtin.file:
+        path: /home/installer/.ssh
+        state: directory
+        owner: installer
+        group: installer
+        mode: '0700'
+    - name: copy ssh public
+      ansible.builtin.copy:
+        src: ~/.ssh/id_rsa_ansible.pub
+        dest: /home/installer/.ssh/authorized_keys
+        owner: installer
+        group: installer
+        mode: '0600' 
+
+- name: to install postgresql
+  hosts: host1
+  vars:
+    pg_version: "13"
+    dbname: "dbmovie"
+    dbuser: "movie"
+    dbschema: "movie"
+  tasks:
+    - name: to install postgresql
+      apt:
+        name: postgresql
+        state: present
+    - name: install acl
+      ansible.builtin.apt:
+        name: acl
+        state: present
+    - name: to start postgresql service
+      ansible.builtin.service:
+        name: postgresql
+        state: started
+        enabled: true
+    - name: Create a new database
+      become_user: postgres
+      community.postgresql.postgresql_db:
+        name: "{{ dbname }}"
+        state: present 
+    - name: Create user
+      become_user: postgres
+      community.postgresql.postgresql_user:
+        name: "{{ dbuser }}"
+        state: present
+        password: "password"
+    - name: Create schema
+      become_user: postgres
+      community.postgresql.postgresql_schema:
+        name: "{{ dbschema }}"
+        state: present 
+    - name: modify postgresql.conf
+      lineinfile:
+        path: /etc/postgresql/13/main/postgresql.conf
+        regexp: "^#?listen_addresses = '.*'$"
+        line: "listen_addresses = '*'"
+        state: present  
+    - name: allow md5 connection for the db user
+      lineinfile: 
+        path: /etc/postgresql/13/main/pg_hba.conf
+        regexp: "^host\\s+all\\s+all\\s+127.0.0.1/32\\s+md5"
+        line: "host  all     all     0.0.0.0/0     md5"
+        backup: yes 
+        
+
+      
+  
+
+
+
+        
