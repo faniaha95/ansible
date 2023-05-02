@@ -1,0 +1,11 @@
+#!/bin/bash
+
+TAG:15.2
+NAME: postgres_dbmovie
+POSTGRES_PASSWORD=password
+POSTGRES_PORT=5432
+
+docker run -p 5432:5432\ 
+-e POSTGRES_PASSWORD=password\ 
+--name postgres_dbmovie\ 
+-d postgres:15.2
