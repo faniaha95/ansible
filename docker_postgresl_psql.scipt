@@ -1,0 +1,8 @@
+#!/bin/bash
+
+NAME: postgres_dbmovie
+POSTGRES_PASSWORD=password
+POSTGRES_PORT=5432
+
+
+docker exec -it postgres_dbmovie psql -U movie -d dbmovie
